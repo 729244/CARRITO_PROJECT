@@ -1,0 +1,6 @@
+Building
+Fall
+Furniture
+NaturalObject
+OffRoad
+PersonObject
