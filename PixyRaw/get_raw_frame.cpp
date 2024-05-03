@@ -107,6 +107,8 @@ int main()
 
   printf ("Connecting to Pixy2...");
 
+  pid_t p = fork();
+  
   // Initialize Pixy2 Connection //
   {
     Result = pixy.init();
@@ -144,7 +146,12 @@ int main()
   // convert Bayer frame to RGB frame
   demosaic(PIXY2_RAW_FRAME_WIDTH, PIXY2_RAW_FRAME_HEIGHT, bayerFrame, rgbFrame);
   // write frame to PPM file for verification
+  if(p == 0){
+    Result = writePPM(PIXY2_RAW_FRAME_WIDTH, PIXY2_RAW_FRAME_HEIGHT, rgbFrame, "out2");
+  }
+  else{
   Result = writePPM(PIXY2_RAW_FRAME_WIDTH, PIXY2_RAW_FRAME_HEIGHT, rgbFrame, "out");
+  }
   if (Result==0)
     printf("Write frame to out.ppm\n");
   
