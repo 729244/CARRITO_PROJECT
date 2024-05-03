@@ -1,19 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-// Estructura para almacenar los datos decodificados
-typedef struct {
-    float latitud;
-    uint8_t latitud_dir;
-    float longitud;
-    uint8_t longitud_dir;
-    float velocidad;
-} GPSData;
+#include "GPS.h"
 
 // Función para extraer un campo específico de la trama
-char* getField(const char* sentence, int fieldIndex) {
-    char* token = strtok((char*)sentence, ",");
+uint8_t* getField(const uint8_t* sentence, int fieldIndex) {
+    uint8_t* token = strtok((uint8_t*)sentence, ",");
     for (int i = 0; i < fieldIndex; ++i) {
         token = strtok(NULL, ",");
     }
@@ -21,12 +13,12 @@ char* getField(const char* sentence, int fieldIndex) {
 }
 
 // Función para decodificar la trama GPRMC
-void decodeGPRMC(const char* sentence, GPSData* gpsData) {
-    char status = getField(sentence, 2)[0];
+void decodeGPRMC(const uint8_t* sentence, GPSData* gpsData) {
+    uint8_t status = getField(sentence, 2)[0];
     double lat_deg = atof(getField(sentence, 3));
-    char lat_dir = getField(sentence, 4)[0];
+    uint8_t lat_dir = getField(sentence, 4)[0];
     double lon_deg = atof(getField(sentence, 5));
-    char lon_dir = getField(sentence, 6)[0];
+    uint8_t lon_dir = getField(sentence, 6)[0];
 
     // Verificamos si la posición es válida
     if (status == 'A') {
@@ -40,7 +32,7 @@ void decodeGPRMC(const char* sentence, GPSData* gpsData) {
     }
 }
 
-void decodeGPGGA(const char* sentence, GPSData* gpsData) {
+void decodeGPGGA(const uint8_t* sentence, GPSData* gpsData) {
     gpsData->latitud = atof(getField(sentence, 2));
     gpsData->latitud_dir = getField(sentence, 3)[0];
     gpsData->longitud = atof(getField(sentence, 4));

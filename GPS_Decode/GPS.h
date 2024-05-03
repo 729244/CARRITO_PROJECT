@@ -2,16 +2,15 @@
 
 #include <stdint.h>
 
-typedef enum{
-    Start,
-    Data,
-    Idle
-} gps_states_t;
+// Estructura para almacenar los datos decodificados
+typedef struct {
+    double latitud;
+    uint8_t latitud_dir;
+    double longitud;
+    uint8_t longitud_dir;
+    double velocidad;
+} GPSData;
 
-typedef struct
-{
-    
-} GPS_t;
 
 
 #endif
