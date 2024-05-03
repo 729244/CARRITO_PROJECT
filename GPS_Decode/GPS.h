@@ -1,6 +1,7 @@
 #ifndef __GPS_h
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // Estructura para almacenar los datos decodificados
 typedef struct {
@@ -11,6 +12,9 @@ typedef struct {
     double velocidad;
 } GPSData;
 
+void decodeGPRMC(uint8_t*, GPSData*);
+void decodeGPGGA(uint8_t*, GPSData*);
+bool verifyChecksum(uint8_t*);
 
 
 #endif
