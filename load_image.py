@@ -4,10 +4,10 @@ from datetime import datetime
 
 # Cargar imagen
 img_path = "/home/root/img192v3/yolov5/train/images/image13_png.rf.7298cf76bfa678154edb426a2134065b.jpg"
-#img_path = "/home/root/image5.png"
+#img_path = "/home/root/out.ppm"
 img = Image.open(img_path)
 
-#img_crop = img.crop((54,207,261,0))
+#img_crop = img.crop((54,0,261,207))
 
 # Cargar modelo entrenado
 modelo = torch.hub.load('/home/root/img192v3/yolov5/','custom', path='/home/root/img192v3/yolov5/runs/train/exp/weights/best-fp16.tflite',source='local')
