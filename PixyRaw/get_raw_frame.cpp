@@ -15,8 +15,22 @@
 
 #include "libpixyusb2.h"
 #include <unistd.h>
+
+#include <fcntl.h>
+#include <stdio.h>
+#include <sys/stat.h>
 Pixy2        pixy;
 
+//PIPE 1 FOR CAMER1 -> NN1
+//PIPE 2 FOR NN1 -> CAMERA1
+
+//PIPE 3 FOR CAMERA2 -> NN2
+//PIPE 4 FOR NN2 -> CAMERA2
+#define PIPE1_NAME "/tmp/pipe1"
+#define PIPE2_NAME "/tmp/pipe2"
+#define PIPE3_NAME "/tmp/pipe3"
+#define PIPE4_NAME "/tmp/pipe4"
+#define MAX_LEN 1
 
 int writePPM(uint16_t width, uint16_t height, uint32_t *image, const char *filename)
 {
@@ -97,6 +111,14 @@ int demosaic(uint16_t width, uint16_t height, const uint8_t *bayerImage, uint32_
 
 int main()
 {
+
+  //READ
+  char buff[MAX_LEN];
+  //WRITE
+  char buff2[MAX_LEN];
+
+  buff2[0] = 49;
+
   int  Result;
   uint8_t *bayerFrame;
   uint32_t rgbFrame[PIXY2_RAW_FRAME_WIDTH*PIXY2_RAW_FRAME_HEIGHT];
@@ -107,7 +129,26 @@ int main()
 
   printf ("Connecting to Pixy2...");
 
+  int fdp1;
+  int fdp2;
+  int pipe1;
+  int pipe2;
   pid_t p = fork();
+
+  if(p == 0){
+    //PROCESS TWO
+    fdp1 = mkfifo(PIPE3_NAME, S_IFIFO | 0666);
+    fdp2 = mkfifo(PIPE4_NAME, S_IFIFO | 0666);
+    pipe1 = open(PIPE3_NAME, O_WRONLY);
+    pipe2 = open(PIPE4_NAME, O_RDONLY);
+  }
+  else{
+    //PROCESS ONE
+    fdp1 = mkfifo(PIPE1_NAME, S_IFIFO | 0666);
+    fdp2 = mkfifo(PIPE2_NAME, S_IFIFO | 0666);
+    pipe1 = open(PIPE1_NAME, O_WRONLY);
+    pipe2 = open(PIPE2_NAME, O_RDONLY);
+  }
   
   // Initialize Pixy2 Connection //
   {
@@ -136,26 +177,33 @@ int main()
     pixy.version->print();
   }
 
-  // need to call stop() befroe calling getRawFrame().
-  // Note, you can call getRawFrame multiple times after calling stop().
-  // That is, you don't need to call stop() each time.
-  pixy.m_link.stop();
+  for(;;){
+    // need to call stop() befroe calling getRawFrame().
+    // Note, you can call getRawFrame multiple times after calling stop().
+    // That is, you don't need to call stop() each time.
+    pixy.m_link.stop();
 
-  // grab raw frame, BGGR Bayer format, 1 byte per pixel
-  pixy.m_link.getRawFrame(&bayerFrame);
-  // convert Bayer frame to RGB frame
-  demosaic(PIXY2_RAW_FRAME_WIDTH, PIXY2_RAW_FRAME_HEIGHT, bayerFrame, rgbFrame);
-  // write frame to PPM file for verification
-  if(p == 0){
-    Result = writePPM(PIXY2_RAW_FRAME_WIDTH, PIXY2_RAW_FRAME_HEIGHT, rgbFrame, "out2");
+    // grab raw frame, BGGR Bayer format, 1 byte per pixel
+    pixy.m_link.getRawFrame(&bayerFrame);
+    // convert Bayer frame to RGB frame
+    demosaic(PIXY2_RAW_FRAME_WIDTH, PIXY2_RAW_FRAME_HEIGHT, bayerFrame, rgbFrame);
+    // write frame to PPM file for verification
+    if(p == 0){
+      Result = writePPM(PIXY2_RAW_FRAME_WIDTH, PIXY2_RAW_FRAME_HEIGHT, rgbFrame, "out2");
+    }
+    else{
+      Result = writePPM(PIXY2_RAW_FRAME_WIDTH, PIXY2_RAW_FRAME_HEIGHT, rgbFrame, "out");
+    }
+
+    if (Result==0){
+        int ret = write(pipe1,buff2,MAX_LEN);
+        ret = read(pipe2,buff,MAX_LEN);
+      }
+    // Call resume() to resume the current program, otherwise Pixy will be left
+    // in "paused" state.  
+    pixy.m_link.resume();
   }
-  else{
-  Result = writePPM(PIXY2_RAW_FRAME_WIDTH, PIXY2_RAW_FRAME_HEIGHT, rgbFrame, "out");
-  }
-  if (Result==0)
-    printf("Write frame to out.ppm\n");
-  
-  // Call resume() to resume the current program, otherwise Pixy will be left
-  // in "paused" state.  
-  pixy.m_link.resume();
+
+  close(pipe1);
+  close(pipe2);
 }
