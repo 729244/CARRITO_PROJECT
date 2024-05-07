@@ -2,57 +2,56 @@ import torch
 from PIL import Image
 from datetime import datetime
 
-# Cargar imagen
-img_path = "/home/root/img192v3/yolov5/train/images/image13_png.rf.7298cf76bfa678154edb426a2134065b.jpg"
-#img_path = "/home/root/out.ppm"
-img = Image.open(img_path)
-
-#img_crop = img.crop((54,0,261,207))
-
 # Cargar modelo entrenado
 modelo = torch.hub.load('/home/root/img192v3/yolov5/','custom', path='/home/root/img192v3/yolov5/runs/train/exp/weights/best-fp16.tflite',source='local')
 print("Modelo cargado")
-# Realizar predicción
-print(type(modelo))
-print(type(img))
-print(f"Empezando result {datetime.now()}")
-results = modelo(img, size=192)
-print(f"Fin result {datetime.now()}")
-####################
-#print("///////////////////////////////////////////////////////////////////////////////////////")
-matriz = results.pandas().xyxy[0]
-print(matriz)
-print(type(matriz))
+
+# Cargar imagen
+img_path = "/home/root/img192v3/yolov5/train/images/image13_png.rf.7298cf76bfa678154edb426a2134065b.jpg"
+#img_path = "/home/root/image5.png"
+img = Image.open(img_path)
+
+#img_crop = img.crop((54,207,261,0))
+    
+print(f"\n Empezando result0 {datetime.now()}\n")
+result0 = modelo(img, size=192)
+matriz0 = result0.pandas().xyxy[0]
+print(matriz0)
+print(type(matriz0))
+print(f"\nFin result0 {datetime.now()}\n")
 
 img_path = "/home/root/img192v3/yolov5/train/images/image88_png.rf.b6d316e921e059c31afa59c6c730edc1.jpg"
 img = Image.open(img_path)
 
-print(f"Empezando result {datetime.now()}")
-result0 = modelo(img, size=192)
-print(f"Fin result {datetime.now()}")
-
-matriz = result0.pandas().xyxy[0]
-print(matriz)
-print(type(matriz))
-
-img_path = "/home/root/img192v3/yolov5/train/images/image51_png.rf.6d7be4104945d7a0089b1e416a839fb3.jpg"
-img = Image.open(img_path)
-
-print(f"Empezando result {datetime.now()}")
+print(f"\nEmpezando result1 {datetime.now()}\n")
 result1 = modelo(img, size=192)
-print(f"Fin result {datetime.now()}")
+matriz1 = result1.pandas().xyxy[0]
+print(matriz1)
+print(type(matriz1))
+print(f"\nFin result1 {datetime.now()}\n")
 
-matriz = result1.pandas().xyxy[0]
-print(matriz)
-print(type(matriz))
+xmin_result0 = result0.pandas().xyxy[0]['xmin']
+xmax_result0 = result0.pandas().xyxy[0]['xmax']
+name_result0 = result0.pandas().xyxy[0]['name']
 
-img_path = "/home/root/img192v3/yolov5/train/images/image100_png.rf.ccbfe400f88ce475c588366ee4c42231.jpg"
-img = Image.open(img_path)
+xmin_result1 = result1.pandas().xyxy[0]['xmin']
+xmax_result1 = result1.pandas().xyxy[0]['xmax']
+name_result1 = result1.pandas().xyxy[0]['name']
 
-print(f"Empezando result {datetime.now()}")
-result2 = modelo(img, size=192)
-print(f"Fin result {datetime.now()}")
+xmin_array0 = list(xmin_result0)
+xmax_array0 = list(xmax_result0)
+name_array0 = list(name_result0)
 
-matriz = result2.pandas().xyxy[0]
-print(matriz)
-print(type(matriz))
+xmin_array1 = list(xmin_result1)
+xmax_array1 = list(xmax_result1)
+name_array1 = list(name_result1)
+ 
+for xmin, xmax, name in zip(xmin_array0, xmax_array0, name_array0):
+    xprom = (xmin + xmax) / 2
+    print(f"R0:{name}:{xprom}")
+for xmin, xmax, name in zip(xmin_array1, xmax_array1, name_array1):
+    xprom = (xmin + xmax) / 2
+    print(f"R1:{name}:{xprom}")
+
+# Cerrar el archivo                                                                            
+                                                              
