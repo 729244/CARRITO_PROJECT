@@ -48,18 +48,24 @@ while(1):
             print(f"\nFin result0 {datetime.now()}\n")
             xmin_result0 = result0.pandas().xyxy[0]['xmin']
             xmax_result0 = result0.pandas().xyxy[0]['xmax']
+            ymin_result0 = result0.pandas().xyxy[0]['ymin']
             name_result0 = result0.pandas().xyxy[0]['name']
             xmin_array0 = list(xmin_result0)
             xmax_array0 = list(xmax_result0)
+            ymin_array0 = list(ymin_result0)
             name_array0 = list(name_result0)
-            for xmin, xmax, name in zip(xmin_array0, xmax_array0, name_array0):
+
+            para_distancia = []
+
+            for xmin, xmax, name, ymin in zip(xmin_array0, xmax_array0, name_array0, ymin_array0):
                 xprom = (xmin + xmax) / 2
-                print(f"R0:{name}:{xprom}")
-            para_distancia = "OB1:min:prom:max,OB2:"
+                CURRENT_TENSOR = ("R:{name}:{xprom}:{ymin}:")
+                para_distancia.append(CURRENT_TENSOR)
             ##
             #mandar pipe con string
-            pipe_file_distance.write(para_distancia)
-            pipe_file_distance.flush()
+            for i in range(len(para_distancia)):
+                pipe_file_distance.write(para_distancia[i])
+                pipe_file_distance.flush()
             ##
             pipe_file_write.write("1\n")
             pipe_file_write.flush()
