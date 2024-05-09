@@ -7,11 +7,14 @@ import os
 modelo = torch.hub.load('/home/root/img192v3/yolov5/','custom', path='/home/root/img192v3/yolov5/runs/train/exp/weights/best-fp16.tflite',source='local')
 print("Modelo cargado")
 
-# Crear pipe con nombre
+# PIPES FOR PIXY
 pipe1_name = "/tmp/pipe1"
 pipe2_name = "/tmp/pipe2"
 pipe3_name = "/tmp/pipe3"
 pipe4_name = "/tmp/pipe4"
+# PIPES FOR DISTANCE
+pipe5_name = "/tmp/pipe5"
+pipe6_name = "/tmp/pipe6"
 
 p = os.fork()
 
@@ -19,12 +22,14 @@ if(p == 0):
     #3 y 4
     pipe_file_read = open(pipe3_name, "r")
     pipe_file_write = open(pipe4_name, "w")
-    img_path = "/home/root/out2.png"
+    img_path = "/home/root/out2.ppm"
+    pipe_file_distance = open(pipe5_name,"w")
 else:
     #1 y 2
     pipe_file_read = open(pipe1_name, "r")
     pipe_file_write = open(pipe2_name, "w")
-    img_path = "/home/root/out.png"
+    img_path = "/home/root/out.ppm"
+    pipe_file_distance = open(pipe6_name,"w")
 
 while(1):
     for line in pipe_file_read:
@@ -50,6 +55,11 @@ while(1):
             for xmin, xmax, name in zip(xmin_array0, xmax_array0, name_array0):
                 xprom = (xmin + xmax) / 2
                 print(f"R0:{name}:{xprom}")
+            para_distancia = "OB1:min:prom:max,OB2:"
+            ##
+            #mandar pipe con string
+            pipe_file_distance.write(para_distancia)
+            pipe_file_distance.flush()
             ##
             pipe_file_write.write("1\n")
             pipe_file_write.flush()
