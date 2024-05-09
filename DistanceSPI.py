@@ -11,9 +11,16 @@ pipe_file_read6 = open(pipe6_name, "r")
 print("Esperando a recibir")
 
 while(1):
-    string1 = pipe_file_read5.read()
-    string2 = pipe_file_read6.read()
-    #leemos los strings
+    for line in pipe_file_read5:
+        recieve = line
+        print("RECIBIMOS DESDE PIPE5:")
+        print(recieve)
+        recieve = 0
+    for line in pipe_file_read6:
+        recieve = line
+        print("RECIBIMOS DESDE PIPE6:")
+        print(recieve)
+        recieve = 0
 
 pipe_file_read5.close()
 pipe_file_read6.close()
