@@ -21,6 +21,8 @@ while(1):
         print("RECIBIMOS DESDE PIPE6:")
         print(recieve)
         recieve = 0
+    tensor_1 = pipe_file_read5.read().split("R")   
+    tensor_2 = pipe_file_read6.read().split("R")
 
 pipe_file_read5.close()
 pipe_file_read6.close()
