@@ -30,7 +30,7 @@ Pixy2        pixy;
 #define PIPE2_NAME "/tmp/pipe2"
 #define PIPE3_NAME "/tmp/pipe3"
 #define PIPE4_NAME "/tmp/pipe4"
-#define MAX_LEN 1
+#define MAX_LEN 2
 
 int writePPM(uint16_t width, uint16_t height, uint32_t *image, const char *filename)
 {
@@ -113,11 +113,7 @@ int main()
 {
 
   //READ
-  char buff[MAX_LEN];
-  //WRITE
-  char buff2[MAX_LEN];
-
-  buff2[0] = 49;
+  char buff[MAX_LEN]; 
 
   int  Result;
   uint8_t *bayerFrame;
@@ -182,6 +178,7 @@ int main()
   }
 
   for(;;){
+
     // need to call stop() befroe calling getRawFrame().
     // Note, you can call getRawFrame multiple times after calling stop().
     // That is, you don't need to call stop() each time.
@@ -200,9 +197,10 @@ int main()
     }
 
     if (Result==0){
-      int ret = write(pipe1,buff2,MAX_LEN);
-      ret = read(pipe2,buff,MAX_LEN);
+      int ret = write(pipe1,"1\n",2);
+      ret = read(pipe2,buff,2);
     }
+
     
     // Call resume() to resume the current program, otherwise Pixy will be left
     // in "paused" state.  

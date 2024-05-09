@@ -18,20 +18,15 @@ else:
     pipe_file_read = open(pipe1_name, "r")
     pipe_file_write = open(pipe2_name, "w")
 
-while(1):
-    recieve = pipe_file_read.read()
-    if(recieve == 49):
-        if(p == 0):
-            print("Se recibió correctamente desde el proceso hijo")
-        else:
-            print("Se recibió correctamente desde el proceso padre")
-    else:
-        if(p == 0):
-            print("No se recibió correctamente el dato, soy el proceso hijo")
-        else:
-            print("No se recibió correctamente el dato, soy el proceso padre")
-    #hacer proceso de la red
-    pipe_file_write.write("1")
+print("Esperando a recibir")
 
+while(1):
+    for line in pipe_file_read:
+        recieve = line
+        if(recieve == "1\n"):
+            #red
+            pipe_file_write.write("1\n")
+            pipe_file_write.flush()
+            recieve = 0
 pipe_file_read.close()
 pipe_file_write.close()
