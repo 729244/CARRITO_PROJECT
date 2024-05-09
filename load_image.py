@@ -23,12 +23,14 @@ if(p == 0):
     pipe_file_read = open(pipe3_name, "r")
     pipe_file_write = open(pipe4_name, "w")
     img_path = "/home/root/out2.ppm"
+    os.mkfifo(pipe5_name)
     pipe_file_distance = open(pipe5_name,"w")
 else:
     #1 y 2
     pipe_file_read = open(pipe1_name, "r")
     pipe_file_write = open(pipe2_name, "w")
     img_path = "/home/root/out.ppm"
+    os.mkfifo(pipe6_name)
     pipe_file_distance = open(pipe6_name,"w")
 
 while(1):
@@ -73,6 +75,7 @@ while(1):
 
 pipe_file_read.close()
 pipe_file_write.close()
+pipe_file_distance.close()
 
 
 # Cerrar el archivo                                                                            

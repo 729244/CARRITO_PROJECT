@@ -1,4 +1,5 @@
 #!/bin/bash 
 
 ./get_raw_frame &
-python3 Python_pipes.py &
+python3 load_image.py &
+python3 DistanceSPI.py &
