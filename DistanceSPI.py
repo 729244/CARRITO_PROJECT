@@ -24,12 +24,25 @@ while(1):
         print("RECIBIMOS DESDE out.ppm o PADRE:")
         print(recieve)
         break
-    for c in range(len(recieve)):
-        if ((recieve[c] == "R:") or (recieve[c] == ":")):
-            recieve[c].pop()
-    for c2 in range(len(recieve2)):
-        if ((recieve2[c2] == "R:") or (recieve2[c2] == ":")):
-            recieve2[c2].pop()
+    received_values = []
+    received_values2 = []
+    for line in pipe_file_read6:
+        receive = line
+        receive = receive.replace(":", "").replace("R", "")
+        received_values.append(receive)
+        print("RECIBIMOS DESDE out.ppm o PADRE:")
+        print(receive)
+        break
+
+    for line2 in pipe_file_read5:
+        receive2 = line2
+        receive2 = receive2.replace(":", "").replace("R", "")
+        received_values2.append(receive2)
+        print("RECIBIMOS DESDE out2.ppm o HIJO:")
+        print(receive2)
+        break
+
+    print(received_values)
     print(recieve)
     print(recieve2)
     recieve = 0
