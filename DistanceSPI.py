@@ -27,7 +27,7 @@ while(1):
     received_values = []
     received_values2 = []
 
-    for quitar in len(recieve):
+    for quitar in range(len(recieve)):
         receive = line
         receive = receive.replace(":", "").replace("R", "")
         received_values.append(receive)
@@ -35,7 +35,7 @@ while(1):
         print(receive)
         break
 
-    for quitar2 in len(recieve2):
+    for quitar2 in range(len(recieve2)):
         receive2 = line2
         receive2 = receive2.replace(":", "").replace("R", "")
         received_values2.append(receive2)
