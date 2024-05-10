@@ -122,7 +122,6 @@ int main()
   printf ("=============================================================\n");
   printf ("= PIXY2 Get Raw Frame Example                               =\n");
   printf ("=============================================================\n");
-  printf("Ayuda\n");
   printf ("Connecting to Pixy2...\n");
 
   int fdp1;
@@ -131,6 +130,7 @@ int main()
   int pipe2;
   pid_t p = fork();
   printf("Forks\n");
+  
   if(p == 0){
     //PROCESS TWO
     fdp1 = mkfifo(PIPE3_NAME, S_IFIFO | 0666);
@@ -149,6 +149,7 @@ int main()
     pipe2 = open(PIPE2_NAME, O_RDONLY);
     printf("Pipe 2 creado\n");
   }
+  
   
   // Initialize Pixy2 Connection //
   {
@@ -195,11 +196,14 @@ int main()
     else{
       Result = writePPM(PIXY2_RAW_FRAME_WIDTH, PIXY2_RAW_FRAME_HEIGHT, rgbFrame, "out");
     }
-
+    
     if (Result==0){
       int ret = write(pipe1,"1\n",2);
       ret = read(pipe2,buff,2);
+    }else{
+      printf("Murio\n");
     }
+    
 
     
     // Call resume() to resume the current program, otherwise Pixy will be left

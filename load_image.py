@@ -23,14 +23,12 @@ if(p == 0):
     pipe_file_read = open(pipe3_name, "r")
     pipe_file_write = open(pipe4_name, "w")
     img_path = "/home/root/out2.ppm"
-    os.mkfifo(pipe5_name)
     pipe_file_distance = open(pipe5_name,"w")
 else:
     #1 y 2
     pipe_file_read = open(pipe1_name, "r")
     pipe_file_write = open(pipe2_name, "w")
     img_path = "/home/root/out.ppm"
-    os.mkfifo(pipe6_name)
     pipe_file_distance = open(pipe6_name,"w")
 
 while(1):
@@ -38,16 +36,17 @@ while(1):
         recieve = line
         if(recieve == "1\n"):
             #red
+            
             img = Image.open(img_path)
 
             img_crop = img.crop((54,0,261,207))
                 
-            print(f"\n Empezando result0 {datetime.now()}\n")
-            result0 = modelo(img, size=192)
+            #print(f"\n Empezando result0 {datetime.now()}\n")
+            result0 = modelo(img_crop, size=192)
             matriz0 = result0.pandas().xyxy[0]
-            print(matriz0)
-            print(type(matriz0))
-            print(f"\nFin result0 {datetime.now()}\n")
+            #print(matriz0)
+            #print(type(matriz0))
+            #print(f"\nFin result0 {datetime.now()}\n")
             xmin_result0 = result0.pandas().xyxy[0]['xmin']
             xmax_result0 = result0.pandas().xyxy[0]['xmax']
             ymin_result0 = result0.pandas().xyxy[0]['ymin']
@@ -57,18 +56,28 @@ while(1):
             ymin_array0 = list(ymin_result0)
             name_array0 = list(name_result0)
 
-            para_distancia = []
 
+            para_distancia = []
             for xmin, xmax, name, ymin in zip(xmin_array0, xmax_array0, name_array0, ymin_array0):
                 xprom = (xmin + xmax) / 2
-                CURRENT_TENSOR = ("R:{name}:{xprom}:{ymin}:")
+                CURRENT_TENSOR = ("R:",{name},":",{xprom},":",{ymin},":")
                 para_distancia.append(CURRENT_TENSOR)
             ##
             #mandar pipe con string
+
+
+            pipe_file_distance.write(str(len(para_distancia)) + " Objetos para ")
+            if(p == 0):
+                pipe_file_distance.write("out2.ppm\n")
+            else:
+                pipe_file_distance.write("out.ppm\n")
+            pipe_file_distance.flush()
             for i in range(len(para_distancia)):
-                pipe_file_distance.write(para_distancia[i])
+                pipe_file_distance.write(str(para_distancia[i]))
+                pipe_file_distance.write("\n")
                 pipe_file_distance.flush()
             ##
+        
             pipe_file_write.write("1\n")
             pipe_file_write.flush()
             recieve = 0
