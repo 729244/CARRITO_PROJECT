@@ -44,8 +44,7 @@ while(1):
         break
 
     print(received_values)
-    print(recieve)
-    print(recieve2)
+    print(received_values2)
     recieve = 0
     recieve2 = 0
 
