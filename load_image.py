@@ -60,17 +60,13 @@ while(1):
             para_distancia = []
             for xmin, xmax, name, ymin in zip(xmin_array0, xmax_array0, name_array0, ymin_array0):
                 xprom = (xmin + xmax) / 2
-                CURRENT_TENSOR = ("R:",{name},":",{xprom},":",{ymin},":")
+                CURRENT_TENSOR = ("R:",{name},":",{xmin},":",{xprom},":",{xmax},":",{ymin},":")
                 para_distancia.append(CURRENT_TENSOR)
             ##
             #mandar pipe con string
 
 
-            pipe_file_distance.write(str(len(para_distancia)) + " Objetos para ")
-            if(p == 0):
-                pipe_file_distance.write("out2.ppm\n")
-            else:
-                pipe_file_distance.write("out.ppm\n")
+            pipe_file_distance.write(str(len(para_distancia)) + "\n")
             pipe_file_distance.flush()
             for i in range(len(para_distancia)):
                 pipe_file_distance.write(str(para_distancia[i]))
