@@ -26,10 +26,10 @@ if(p == 0):
     pipe_file_distance = open(pipe5_name,"w")
 else:
     #1 y 2
-    pipe_file_read = open(pipe1_name, "r")
     pipe_file_write = open(pipe2_name, "w")
     img_path = "/home/root/out.ppm"
     pipe_file_distance = open(pipe6_name,"w")
+    pipe_file_read = open(pipe1_name, "r")
 
 while(1):
     for line in pipe_file_read:

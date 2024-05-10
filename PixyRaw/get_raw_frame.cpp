@@ -159,7 +159,9 @@ int main()
     {
       printf ("Error\n");
       printf ("pixy.init() returned %d\n", Result);
-      return Result;
+      while(1){
+
+      }
     }
 
     printf ("Success\n");
