@@ -50,7 +50,8 @@ while(1):
                     counter1 = counter1 + 1
                 break
             print("RECIBIMOS DESDE out.ppm o PADRE:")
-            processObj(recieve)
+            [class1, xmin1, xprom1, xmax1, ymin1] = processObj(recieve)
+            DATA_1[line] = [class1, xmin1, xprom1, xmax1, ymin1]
             counter1 = counter1 + 1
             if(counter1 == ou1_obj+1):
                 ou1_flag = 1
@@ -68,7 +69,8 @@ while(1):
                 break
             print("RECIBIMOS DESDE out2.ppm o HIJO:")
             #Falta poner los objetos que recibe en lo que se te antoje y despues ya lo de la distancia
-            processObj(recieve2)
+            [class2, xmin2, xprom2,xmax2, ymin2] = processObj(recieve2)
+            DATA_2[line2] = [class2, xmin2, xprom2, xmax2, ymin2]
             counter2 = counter2 + 1
             if(counter2 == ou2_obj+1):
                 ou2_flag = 1
@@ -77,31 +79,40 @@ while(1):
 
     if(ou1_flag == 1 and ou2_flag == 1):
         #data ready to tal
-        """
-        Compare object numbers and classes and the ones who are the same, get objClass,xmin,xprom,xmax and distance to send it in SPI
-        First send number of valid objects
-        Then send the array of length 5*ObjNums each one one byte and meaning the description above with some enumerated type data being
-        CLASS_NUM
-        For xmin,xprom and xmax LEFT(0),CENTER(1),RIGHT(2)
-        For Distance CLOSE(0),MID(1),FAR(2)
-
-    for i in range(len(DATA_1)):
-        xclass1 = DATA_1[i][0]
-        xclass2 = DATA_2[i][0]
-        xprom1 = DATA_1[i][2]
-        xprom2 = DATA_2[i][2]
-        result_f = (xprom1 / xprom2) * 7
-        if (xclass1 == xclass2):
+        #Compare object numbers and classes and the ones who are the same, get objClass,xmin,xprom,xmax and distance to send it in SPI
+        #First send number of valid objects
+        #Then send the array of length 5*ObjNums each one one byte and meaning the description above with some enumerated type data being
+        #CLASS_NUM
+        #For xmin,xprom and xmax LEFT(0),CENTER(1),RIGHT(2)
+        #For Distance CLOSE(0),MID(1),FAR(2)
+        if(len(DATA_1) == len(DATA_2)):
             spi = spidev.SpiDev()
             spi.open(0, 0)
-            DATA_F.append(xclass1)
-            DATA_F.append(result_f)
-            for i in range(len(DATA_F)):
-                size = len(str(DATA_F[i]).encode())
-                spi.xfer([size])
-                spi.xfer([DATA_F[i]])
+            spi.xfer([len(DATA_1)])
             spi.close()
-        """
+            for i in range(len(DATA_1)):
+                xclass1 = DATA_1[i][0]
+                xclass2 = DATA_2[i][0]
+                xprom1 = DATA_1[i][2]
+                xprom2 = DATA_2[i][2]
+                result_f = (xprom1 / xprom2) * 7
+                if (xclass1 == xclass2):
+                    spi = spidev.SpiDev()
+                    spi.open(0, 0)
+                    DATA_F.append(xclass1)
+                    DATA_F.append(result_f)
+                    for i in range(len(DATA_F)):
+                        size = len(str(DATA_F[i]).encode())
+                        spi.xfer([size])
+                        spi.xfer([DATA_F[i]])
+                        spi.close()
+        else:
+            print("No se pueden comparar los objetos")
+            spi = spidev.SpiDev()
+            spi.open(0, 0)
+            spi.xfer(200)
+            spi.close()
+
         ou2_flag = 0 
         ou1_flag = 0
 
