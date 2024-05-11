@@ -1,0 +1,10 @@
+D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/core_cm4.h:1679:22:__NVIC_EnableIRQ	16	static
+D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/core_cm4.h:1809:22:__NVIC_SetPriority	16	static
+D:\Documentos\Embebidos_II\Practicas\CARRITO\drivers/fsl_clock.h:725:20:CLOCK_EnableClock	24	static
+D:\Documentos\Embebidos_II\Practicas\CARRITO\drivers/fsl_ftm.h:731:20:FTM_StartTimer	24	static
+D:\Documentos\Embebidos_II\Practicas\CARRITO\drivers/fsl_ftm.h:745:20:FTM_StopTimer	16	static
+D:\Documentos\Embebidos_II\Practicas\CARRITO\drivers/fsl_ftm.h:1027:20:FTM_SetSoftwareTrigger	16	static
+D:\Documentos\Embebidos_II\Practicas\CARRITO\drivers/fsl_port.h:374:20:PORT_SetPinMux	24	static
+../source/pwm_controller.c:42:6:init_pwm	104	static
+../source/pwm_controller.c:85:6:pwm_update	16	static
+../source/pwm_controller.c:100:6:FTM0_IRQHandler	48	static
