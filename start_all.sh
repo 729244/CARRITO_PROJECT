@@ -2,6 +2,8 @@
 
 mkfifo /tmp/pipe5
 mkfifo /tmp/pipe6
+mkfifo /tmp/pipe7
 ./get_raw_frame &
 python3 load_image.py &
 python3 DistanceSPI.py &
+./SPI &
