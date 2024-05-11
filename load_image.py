@@ -68,10 +68,11 @@ while(1):
 
             pipe_file_distance.write(str(len(para_distancia)) + "\n")
             pipe_file_distance.flush()
-            for i in range(len(para_distancia)):
-                pipe_file_distance.write(str(para_distancia[i]))
-                pipe_file_distance.write("\n")
-                pipe_file_distance.flush()
+            if(len(para_distancia) != 0 ): 
+                for i in range(len(para_distancia)):
+                    pipe_file_distance.write(str(para_distancia[i]))
+                    pipe_file_distance.write("\n")
+                    pipe_file_distance.flush()
             ##
         
             pipe_file_write.write("1\n")
