@@ -1,6 +1,7 @@
 #Distance and SPI
 import time
 import os
+import spidev
 
 # Crear pipe con nombre
 pipe5_name = "/tmp/pipe5"
@@ -35,6 +36,9 @@ def processObj(line):
 
 
 while(1):
+    DATA_1 = []
+    DATA_2 = []
+    DATA_F = []
     for line2 in pipe_file_read5:
         recieve2 = line2
         if(counter2 == 0): #Significa que es el dato donde indican los objetos
@@ -44,7 +48,8 @@ while(1):
             break
         print("RECIBIMOS DESDE out2.ppm o HIJO:")
         #Falta poner los objetos que recibe en lo que se te antoje y despues ya lo de la distancia
-        processObj(recieve2)
+        [clase2, xmin2, xprom2, xmax2, ymin2] = processObj(recieve2)
+        DATA_1.append([clase2, xmin2, xprom2, xmax2, ymin2])
         counter2 = counter2 + 1
         if(counter2 == ou2_obj+1):
             counter2 = 0
@@ -57,11 +62,28 @@ while(1):
             counter1 = counter1 + 1
             break
         print("RECIBIMOS DESDE out.ppm o PADRE:")
-        processObj(recieve)
+        [clase1, xmin1, xprom1, xmax1, ymin1] = processObj(recieve)
+        DATA_2.append([clase1, xmin1, xprom1, xmax1, ymin1])
         counter1 = counter1 + 1
         if(counter1 == ou1_obj+1):
             counter1 = 0
         break
+    for i in range(len(DATA_1)):
+        xclass1 = DATA_1[i][0]
+        xclass2 = DATA_2[i][0]
+        xprom1 = DATA_1[i][2]
+        xprom2 = DATA_2[i][2]
+        result_f = (xprom1 / xprom2) * 7
+        if (xclass1 == xclass2):
+            spi = spidev.SpiDev()
+            spi.open(0, 0)
+            DATA_F.append(xclass1)
+            DATA_F.append(result_f)
+            for i in range(len(DATA_F)):
+                size = len(str(DATA_F[i]).encode())
+                spi.xfer([size])
+                spi.xfer([DATA_F[i]])
+            spi.close()
 
 pipe_file_read5.close()
 pipe_file_read6.close()
