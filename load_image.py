@@ -1,7 +1,8 @@
 import torch
-from PIL import Image
+from PIL import Image, ImageFile
 from datetime import datetime
 import os
+ImageFile.LOAD_TRUNCATED_IMAGES=True
 
 # Cargar modelo entrenado
 modelo = torch.hub.load('/home/root/img192v3/yolov5/','custom', path='/home/root/img192v3/yolov5/runs/train/exp/weights/best-fp16.tflite',source='local')
