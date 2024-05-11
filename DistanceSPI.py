@@ -48,6 +48,8 @@ while(1):
                 print("Para out.ppm se esperan " + str(ou1_obj) + " objetos")
                 if(ou1_obj != 0):
                     counter1 = counter1 + 1
+                else:
+                    ou1_flag = 1
                 break
             print("RECIBIMOS DESDE out.ppm o PADRE:")
             [class1, xmin1, xprom1, xmax1, ymin1] = processObj(recieve)
@@ -67,6 +69,8 @@ while(1):
                 print("Para out2.ppm se esperan " + str(ou2_obj) + " objetos")
                 if(ou2_obj != 0):
                     counter2 = counter2 + 1
+                else:
+                    ou2_flag = 1
                 break
             print("RECIBIMOS DESDE out2.ppm o HIJO:")
             #Falta poner los objetos que recibe en lo que se te antoje y despues ya lo de la distancia
