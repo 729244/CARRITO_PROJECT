@@ -38,10 +38,10 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define EXAMPLE_DSPI_SLAVE_BASEADDR SPI0
+#define EXAMPLE_DSPI_SLAVE_BASEADDR SPI2
 #define TRANSFER_SIZE 50U /*! Transfer dataSize */
-#define ECCHO 13u
-#define TRIGGER 25u
+#define ECCHO 10u
+#define TRIGGER 0u
 #define TURN_RIGHT 1
 #define TURN_LEFT -1
 #define STRAIGHT 2
@@ -163,23 +163,31 @@ void DSPI_SlaveUserCallback(SPI_Type *base, dspi_slave_handle_t *handle, status_
 {
     if (flag_spi == 0)
     {
-        PRINTF("This is DSPI slave transfer completed callback. \r\n");
-        PRINTF("It's a successful transfer. \r\n\r\n");
-        for(uint8_t i = 0; i<TRANSFER_SIZE;i++){
+        //PRINTF("This is DSPI slave transfer completed callback. \r\n");
+        //PRINTF("It's a successful transfer. \r\n\r\n");
+        for(uint8_t i = 0; i<((slaveRxSize[0]-48)*5)+1;i++){
         	if((i & 0x0fU) == 0u){
         		PRINTF("\r\n");
         	}
-        	PRINTF(" %02X",slaveRxData[i]);
+        	PRINTF(" %c",slaveRxData[i]);
         }
 		PRINTF("\r\n");
+		slaveRxSize[0] == 0x00;
 	    xTaskResumeFromISR(get_size_spi_handle);
     }else{
-	    xTaskResumeFromISR(get_objets_spi_handle);
+    	PRINTF("%c",slaveRxSize[0]);
+    	PRINTF("\r\n");
+    	if(slaveRxSize[0]== 48){ //verify if there is 0 in size
+    		xTaskResumeFromISR(get_size_spi_handle);
+    	}
+    	else{
+    		 xTaskResumeFromISR(get_objets_spi_handle);
+    	}
     }
 }
-void PORTD_IRQHandler(void)
+void PORTA_IRQHandler(void)
 {
-    GPIO_PortClearInterruptFlags(GPIOD, 1U << ECCHO);
+    GPIO_PortClearInterruptFlags(GPIOA, 1U << ECCHO);
 	if (edge == 0){
 			PIT_StartTimer(PIT, kPIT_Chnl_0);
 			usec_start = PIT_GetCurrentTimerCount(PIT, kPIT_Chnl_0);
@@ -200,13 +208,15 @@ int main(void)
 {
 	overclocking();
     /* Init board hardware. */
+	CLOCK_EnableClock(kCLOCK_PortA);
+	CLOCK_EnableClock(kCLOCK_PortB);
+	CLOCK_EnableClock(kCLOCK_PortC);
 	CLOCK_EnableClock(kCLOCK_PortD);
 	CLOCK_EnableClock(kCLOCK_PortE);
 	CLOCK_SetSimSafeDivs();
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
-
 	//UART pin init
 	CLOCK_EnableClock(kCLOCK_PortD);
 	PORT_SetPinMux(PORTD, 2U, kPORT_MuxAlt3);
@@ -250,18 +260,18 @@ int main(void)
 	NVIC_SetPriority(EXAMPLE_I2C_MASTER_IRQN, 3);
 
 	
-
+    PRINTF("INICIO\r\n");
     xTaskCreate(spi_init, "spi_init", configMINIMAL_STACK_SIZE + 100, NULL, 2U, &spi_init_handle);
-    xTaskCreate(motor_init, "motor_init", configMINIMAL_STACK_SIZE + 100, NULL, 2U, &motor_init_handle);
+    //xTaskCreate(motor_init, "motor_init", configMINIMAL_STACK_SIZE + 100, NULL, 3U, &motor_init_handle);
     xTaskCreate(ultrasonic_init,"ultrasonic_init",configMINIMAL_STACK_SIZE + 100,NULL,2U,&ultrasonic_init_handle);
 
     xTaskCreate(get_size_spi, "get_size_spi", configMINIMAL_STACK_SIZE + 100, NULL, 1U, &get_size_spi_handle);
     xTaskCreate(get_objets_spi,"get_objets_spi",configMINIMAL_STACK_SIZE + 100,NULL,1U,&get_objets_spi_handle);
 
     xTaskCreate(ultrasonic,"ultrasonic",configMINIMAL_STACK_SIZE + 100,NULL,1U,&ultrasonic_handle);
-    xTaskCreate(turn,"turn",configMINIMAL_STACK_SIZE + 100,NULL,1U,&turn_handle);
-    xTaskCreate(turn15,"turn15",configMINIMAL_STACK_SIZE + 100,NULL,1U,&turn15_handle);
-    xTaskCreate(stopAndResetDirection,"stopAndResetDirection",configMINIMAL_STACK_SIZE + 100,NULL,1U,&reset_direction_handle);
+    //xTaskCreate(turn,"turn",configMINIMAL_STACK_SIZE + 100,NULL,1U,&turn_handle);
+    //xTaskCreate(turn15,"turn15",configMINIMAL_STACK_SIZE + 100,NULL,1U,&turn15_handle);
+    //xTaskCreate(stopAndResetDirection,"stopAndResetDirection",configMINIMAL_STACK_SIZE + 100,NULL,1U,&reset_direction_handle);
     vTaskStartScheduler();
     for (;;)
         ;
@@ -285,7 +295,7 @@ static void spi_init(void *pvParameters)
 	DSPI_SlaveInit(EXAMPLE_DSPI_SLAVE_BASEADDR, &slaveConfig);
 
 	DSPI_SlaveTransferCreateHandle(EXAMPLE_DSPI_SLAVE_BASEADDR, &g_s_handle, DSPI_SlaveUserCallback, NULL);
-	NVIC_SetPriority(SPI0_IRQn, 3u);
+	NVIC_SetPriority(SPI2_IRQn, 3u);
 	vTaskDelete(spi_init_handle);
 }
 
@@ -413,7 +423,7 @@ static void get_size_spi(void *pvParameters)
 	dspi_transfer_t slaveXfer;
 	while(1){
 		flag_spi = 1;
-		slaveRxSize[1] = 0x00;
+		slaveRxSize[0] = 0x00;
 		/* Set slave transfer ready to receive data */
 		slaveXfer.txData      = NULL;
 		slaveXfer.rxData      = slaveRxSize;
@@ -430,15 +440,20 @@ static void get_objets_spi(void *pvParameters){
 	while(1){
 		vTaskSuspend(get_objets_spi_handle);
     	flag_spi = 0;
-		for (uint8_t i = 0; i < slaveRxSize[1]*5; i++)
+		for (uint8_t i = 0; i < (slaveRxSize[0]-48)*5+1; i++)
 		{
 			slaveRxData[i] = 0U;
 		}
-
+		uint32_t size_tranfer = 0;
+		if(slaveRxSize[0] == 48){
+			size_tranfer = 0;
+		}else{
+			size_tranfer = ((slaveRxSize[0]-48)*5)+1;
+		}
 		/* Set slave transfer ready to receive data */
 		slaveXfer.txData      = NULL;
 		slaveXfer.rxData      = slaveRxData;
-		slaveXfer.dataSize    = slaveRxSize[1]*5;
+		slaveXfer.dataSize    = size_tranfer;
 		slaveXfer.configFlags = kDSPI_SlaveCtar0;
 
 		/* Slave start receive */
@@ -457,20 +472,20 @@ static void ultrasonic_init(void *pvParameters){
         kGPIO_DigitalOutput,
         0,
     };
-    PORT_SetPinMux(PORTD, ECCHO, kPORT_MuxAsGpio);
-    GPIO_PinInit(GPIOD, ECCHO, &input);
-    PORT_SetPinInterruptConfig(PORTD, ECCHO, kPORT_InterruptEitherEdge);
-    PORT_SetPinMux(PORTE, TRIGGER, kPORT_MuxAsGpio);
-    GPIO_PinInit(GPIOE, TRIGGER, &output);
-    GPIO_PortClear(GPIOE, 1U << TRIGGER);
+    PORT_SetPinMux(PORTA, ECCHO, kPORT_MuxAsGpio);
+    GPIO_PinInit(GPIOA, ECCHO, &input);
+    PORT_SetPinInterruptConfig(PORTA, ECCHO, kPORT_InterruptEitherEdge);
+    PORT_SetPinMux(PORTD, TRIGGER, kPORT_MuxAsGpio);
+    GPIO_PinInit(GPIOD, TRIGGER, &output);
+    GPIO_PortClear(GPIOD, 1U << TRIGGER);
 	pit_config_t pitConfig;
 	PIT_GetDefaultConfig(&pitConfig);
 	PIT_Init(PIT, &pitConfig);
 	PIT_SetTimerPeriod(PIT, kPIT_Chnl_0, USEC_TO_COUNT(500000,  CLOCK_GetFreq(kCLOCK_BusClk)));
 	PIT_StopTimer(PIT, kPIT_Chnl_0);
-	NVIC_SetPriority(PORTD_IRQn, 2u);
+	NVIC_SetPriority(PORTA_IRQn, 2u);
 	__set_BASEPRI(10 << (8 - __NVIC_PRIO_BITS));
-	EnableIRQ(PORTD_IRQn);
+	EnableIRQ(PORTA_IRQn);
     vTaskDelete(ultrasonic_init_handle);
 }
 static void ultrasonic(void *pvParameters){
