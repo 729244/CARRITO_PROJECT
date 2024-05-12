@@ -108,21 +108,21 @@ while(1):
 
                     if (xmin_f < 80):
                          DATA_F = DATA_F + "I" #XMIN A LA IZQUIERDA
-                    elif(xmin_f > 80):
+                    elif(xmin_f > 112):
                         DATA_F = DATA_F + "D" #XMIN A LA DERECHA
                     else:
                         DATA_F = DATA_F + "C" #XMIN CENTRADO
 
-                    if (result_f > 80):
+                    if (result_f < 80):
                         DATA_F = DATA_F + "I" #I de izquierda
-                    elif (result_f < 80):
+                    elif (result_f > 112):
                         DATA_F = DATA_F + "D" #D de derecha
                     else:
                         DATA_F = DATA_F + "C" #C de centro
 
                     if (xmax_f < 80):
                          DATA_F = DATA_F + "I" #XMIN A LA IZQUIERDA
-                    elif(xmax_f > 80):
+                    elif(xmax_f > 112):
                         DATA_F = DATA_F + "D" #XMIN A LA DERECHA
                     else:
                         DATA_F = DATA_F + "C" #XMIN CENTRADO

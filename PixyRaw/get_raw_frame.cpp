@@ -202,6 +202,7 @@ int main()
     if (Result==0){
       int ret = write(pipe1,"1\n",2);
       ret = read(pipe2,buff,2);
+      memset(buff, 0, sizeof(buff));
     }else{
       printf("Murio\n");
     }
