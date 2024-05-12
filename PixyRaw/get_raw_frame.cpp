@@ -30,7 +30,7 @@ Pixy2        pixy;
 #define PIPE2_NAME "/tmp/pipe2"
 #define PIPE3_NAME "/tmp/pipe3"
 #define PIPE4_NAME "/tmp/pipe4"
-#define MAX_LEN 1
+#define MAX_LEN 2
 
 int writePPM(uint16_t width, uint16_t height, uint32_t *image, const char *filename)
 {
@@ -113,11 +113,7 @@ int main()
 {
 
   //READ
-  char buff[MAX_LEN];
-  //WRITE
-  char buff2[MAX_LEN];
-
-  buff2[0] = 49;
+  char buff[MAX_LEN]; 
 
   int  Result;
   uint8_t *bayerFrame;
@@ -126,29 +122,34 @@ int main()
   printf ("=============================================================\n");
   printf ("= PIXY2 Get Raw Frame Example                               =\n");
   printf ("=============================================================\n");
-
-  printf ("Connecting to Pixy2...");
+  printf ("Connecting to Pixy2...\n");
 
   int fdp1;
   int fdp2;
   int pipe1;
   int pipe2;
   pid_t p = fork();
-
+  printf("Forks\n");
+  
   if(p == 0){
     //PROCESS TWO
     fdp1 = mkfifo(PIPE3_NAME, S_IFIFO | 0666);
-    fdp2 = mkfifo(PIPE4_NAME, S_IFIFO | 0666);
     pipe1 = open(PIPE3_NAME, O_WRONLY);
+    printf("Pipe 3 creado\n");
+    fdp2 = mkfifo(PIPE4_NAME, S_IFIFO | 0666);
     pipe2 = open(PIPE4_NAME, O_RDONLY);
+    printf("Pipe 4 creado\n");
   }
   else{
     //PROCESS ONE
     fdp1 = mkfifo(PIPE1_NAME, S_IFIFO | 0666);
-    fdp2 = mkfifo(PIPE2_NAME, S_IFIFO | 0666);
     pipe1 = open(PIPE1_NAME, O_WRONLY);
+    printf("Pipe 1 creado\n");
+    fdp2 = mkfifo(PIPE2_NAME, S_IFIFO | 0666);
     pipe2 = open(PIPE2_NAME, O_RDONLY);
+    printf("Pipe 2 creado\n");
   }
+  
   
   // Initialize Pixy2 Connection //
   {
@@ -158,7 +159,9 @@ int main()
     {
       printf ("Error\n");
       printf ("pixy.init() returned %d\n", Result);
-      return Result;
+      while(1){
+
+      }
     }
 
     printf ("Success\n");
@@ -178,6 +181,7 @@ int main()
   }
 
   for(;;){
+
     // need to call stop() befroe calling getRawFrame().
     // Note, you can call getRawFrame multiple times after calling stop().
     // That is, you don't need to call stop() each time.
@@ -194,11 +198,17 @@ int main()
     else{
       Result = writePPM(PIXY2_RAW_FRAME_WIDTH, PIXY2_RAW_FRAME_HEIGHT, rgbFrame, "out");
     }
-
+    
     if (Result==0){
-        int ret = write(pipe1,buff2,MAX_LEN);
-        ret = read(pipe2,buff,MAX_LEN);
-      }
+      int ret = write(pipe1,"1\n",2);
+      ret = read(pipe2,buff,2);
+      memset(buff, 0, sizeof(buff));
+    }else{
+      printf("Murio\n");
+    }
+    
+
+    
     // Call resume() to resume the current program, otherwise Pixy will be left
     // in "paused" state.  
     pixy.m_link.resume();

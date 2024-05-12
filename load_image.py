@@ -1,9 +1,10 @@
 import torch
 from PIL import Image, ImageFile
+import PIL
 from datetime import datetime
 import os
-import time
-ImageFile.LOAD_TRUNCATED_IMAGES = True
+ImageFile.LOAD_TRUNCATED_IMAGES=True
+
 # Cargar modelo entrenado
 modelo = torch.hub.load('/home/root/img192v3/yolov5/','custom', path='/home/root/img192v3/yolov5/runs/train/exp/weights/best-fp16.tflite',source='local')
 print("Modelo cargado")
@@ -38,44 +39,44 @@ while(1):
         if(recieve == "1\n"):
             #red
             
-            img = Image.open(img_path)
+            try:    
+                img = Image.open(img_path)
+            except:
+                print("HUBO UN ERROR AL ABRIR LA IMAGEN, BORRANDOLA Y SOLICITANDO UNA NUEVA")
+                print("IMAGE REMOVED, TRYING AGAIN")
+            else:
+                img_crop = img.crop((54,0,261,207))    
+                #print(f"\n Empezando result0 {datetime.now()}\n")
+                result0 = modelo(img_crop, size=192)
+                matriz0 = result0.pandas().xyxy[0]
+                #print(matriz0)
+                #print(type(matriz0))
+                #print(f"\nFin result0 {datetime.now()}\n")
+                xmin_result0 = result0.pandas().xyxy[0]['xmin']
+                xmax_result0 = result0.pandas().xyxy[0]['xmax']
+                ymin_result0 = result0.pandas().xyxy[0]['ymin']
+                name_result0 = result0.pandas().xyxy[0]['name']
+                xmin_array0 = list(xmin_result0)
+                xmax_array0 = list(xmax_result0)
+                ymin_array0 = list(ymin_result0)
+                name_array0 = list(name_result0)
 
-            img_crop = img.crop((54,0,261,207))
-                
-            #print(f"\n Empezando result0 {datetime.now()}\n")
-            result0 = modelo(img_crop, size=192)
-            matriz0 = result0.pandas().xyxy[0]
-            #print(matriz0)
-            #print(type(matriz0))
-            #print(f"\nFin result0 {datetime.now()}\n")
-            xmin_result0 = result0.pandas().xyxy[0]['xmin']
-            xmax_result0 = result0.pandas().xyxy[0]['xmax']
-            ymin_result0 = result0.pandas().xyxy[0]['ymin']
-            name_result0 = result0.pandas().xyxy[0]['name']
-            xmin_array0 = list(xmin_result0)
-            xmax_array0 = list(xmax_result0)
-            ymin_array0 = list(ymin_result0)
-            name_array0 = list(name_result0)
 
-
-            para_distancia = []
-            for xmin, xmax, name, ymin in zip(xmin_array0, xmax_array0, name_array0, ymin_array0):
-                xprom = (xmin + xmax) / 2
-                CURRENT_TENSOR = ("R:",{name},":",{xmin},":",{xprom},":",{xmax},":",{ymin},":")
-                para_distancia.append(CURRENT_TENSOR)
+                para_distancia = []
+                for xmin, xmax, name, ymin in zip(xmin_array0, xmax_array0, name_array0, ymin_array0):
+                    xprom = (xmin + xmax) / 2
+                    CURRENT_TENSOR = ("R:",{name},":",{xmin},":",{xprom},":",{xmax},":",{ymin},":")
+                    para_distancia.append(CURRENT_TENSOR)
+                ##
+                #mandar pipe con string
+                pipe_file_distance.write(str(len(para_distancia)) + "\n")
+                pipe_file_distance.flush()
+                if(len(para_distancia) != 0 ): 
+                    for i in range(len(para_distancia)):
+                        pipe_file_distance.write(str(para_distancia[i]))
+                        pipe_file_distance.write("\n")
+                        pipe_file_distance.flush()
             ##
-            #mandar pipe con string
-
-
-            pipe_file_distance.write(str(len(para_distancia)) + "\n")
-            pipe_file_distance.flush()
-            if(len(para_distancia) != 0 ): 
-                for i in range(len(para_distancia)):
-                    pipe_file_distance.write(str(para_distancia[i]))
-                    pipe_file_distance.write("\n")
-                    pipe_file_distance.flush()
-            ##
-        
             pipe_file_write.write("1\n")
             pipe_file_write.flush()
             recieve = 0

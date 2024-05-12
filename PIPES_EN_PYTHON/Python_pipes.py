@@ -1,37 +1,38 @@
 import os
+#pull en master y nueva branch ahi
 
-# Crear pipe con nombre
-pipe_name = "pipe_file.txt"
-os.mkfifo(pipe_name)
-#Escribir al pipe con nombre
-pipe_file = open(pipe_name, "w")
-pipe_file.write("Hola, mundo!")
-pipe_file.close()
+# PIPES FOR PIXY
+pipe1_name = "/tmp/pipe1"
+pipe2_name = "/tmp/pipe2"
+pipe3_name = "/tmp/pipe3"
+pipe4_name = "/tmp/pipe4"
+# PIPES FOR DISTANCE
+pipe5_name = "/tmp/pipe5"
+pipe6_name = "/tmp/pipe6"
 
-# Leer del pipe con nombre
-pipe_file = open(pipe_name, "r")
-data = pipe_file.read()
-print(data)
-pipe_file.close()
+p = os.fork()
 
+if(p == 0):
+    #3 y 4
+    pipe_file_read = open(pipe3_name, "r")
+    #pipe_file_write = open(pipe4_name, "w")
+    #pipe_file_distance = open(pipe5_name,"w")
+else:
+    #1 y 2
+    pipe_file_read = open(pipe1_name, "r")
+    #pipe_file_write = open(pipe2_name, "w")
+    #pipe_file_distance = open(pipe6_name,"w")
 
-# Crear el archivo de lectura y escritura
-#pipe_file = open("pipe_file.txt", "w+")
+print("Esperando a recibir")
 
-# Escribir un mensaje en el archivo
-#message = "Hola, mundo!"
-#pipe_file.write(message)
-#pipe_file.flush()
-
-# Mover el puntero al inicio del archivo
-#pipe_file.seek(0)
-
-# Leer del archivo
-#data = pipe_file.read()
-#print(data)
-
-# Cerrar el archivo
-#pipe_file.close()
-
-
-
+while(1):
+    for line in pipe_file_read:
+        recieve = line
+        if(recieve == "1\n"):
+            #red
+            pipe_file_write.write("1\n")
+            pipe_file_write.flush()
+            recieve = 0
+pipe_file_read.close()
+#pipe_file_write.close()
+#pipe_file_distance.close()
