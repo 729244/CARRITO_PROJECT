@@ -3,6 +3,7 @@ from PIL import Image, ImageFile
 import PIL
 from datetime import datetime
 import os
+import time
 ImageFile.LOAD_TRUNCATED_IMAGES=True
 
 # Cargar modelo entrenado
@@ -38,6 +39,7 @@ while(1):
         recieve = line
         if(recieve == "1\n"):
             #red
+            time.sleep(0.5)
             
             try:    
                 img = Image.open(img_path)
