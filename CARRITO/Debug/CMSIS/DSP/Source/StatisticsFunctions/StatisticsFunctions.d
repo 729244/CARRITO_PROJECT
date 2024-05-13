@@ -2,9 +2,9 @@ CMSIS/DSP/Source/StatisticsFunctions/StatisticsFunctions.o \
  CMSIS/DSP/Source/StatisticsFunctions/StatisticsFunctions.d: \
  ../CMSIS/DSP/Source/StatisticsFunctions/StatisticsFunctions.c \
  ../CMSIS/DSP/Source/StatisticsFunctions/arm_max_f32.c \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS\DSP\Include/arm_math.h \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_compiler.h \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_gcc.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS\DSP\Include/arm_math.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_compiler.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_gcc.h \
  ../CMSIS/DSP/Source/StatisticsFunctions/arm_max_q15.c \
  ../CMSIS/DSP/Source/StatisticsFunctions/arm_max_q31.c \
  ../CMSIS/DSP/Source/StatisticsFunctions/arm_max_q7.c \
@@ -30,9 +30,9 @@ CMSIS/DSP/Source/StatisticsFunctions/StatisticsFunctions.o \
  ../CMSIS/DSP/Source/StatisticsFunctions/arm_var_q15.c \
  ../CMSIS/DSP/Source/StatisticsFunctions/arm_var_q31.c
 ../CMSIS/DSP/Source/StatisticsFunctions/arm_max_f32.c:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS\DSP\Include/arm_math.h:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_compiler.h:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_gcc.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS\DSP\Include/arm_math.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_compiler.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_gcc.h:
 ../CMSIS/DSP/Source/StatisticsFunctions/arm_max_q15.c:
 ../CMSIS/DSP/Source/StatisticsFunctions/arm_max_q31.c:
 ../CMSIS/DSP/Source/StatisticsFunctions/arm_max_q7.c:

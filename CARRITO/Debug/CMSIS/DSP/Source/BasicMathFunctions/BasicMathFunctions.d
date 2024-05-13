@@ -2,9 +2,9 @@ CMSIS/DSP/Source/BasicMathFunctions/BasicMathFunctions.o \
  CMSIS/DSP/Source/BasicMathFunctions/BasicMathFunctions.d: \
  ../CMSIS/DSP/Source/BasicMathFunctions/BasicMathFunctions.c \
  ../CMSIS/DSP/Source/BasicMathFunctions/arm_abs_f32.c \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS\DSP\Include/arm_math.h \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_compiler.h \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_gcc.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS\DSP\Include/arm_math.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_compiler.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_gcc.h \
  ../CMSIS/DSP/Source/BasicMathFunctions/arm_abs_q15.c \
  ../CMSIS/DSP/Source/BasicMathFunctions/arm_abs_q31.c \
  ../CMSIS/DSP/Source/BasicMathFunctions/arm_abs_q7.c \
@@ -40,9 +40,9 @@ CMSIS/DSP/Source/BasicMathFunctions/BasicMathFunctions.o \
  ../CMSIS/DSP/Source/BasicMathFunctions/arm_sub_q31.c \
  ../CMSIS/DSP/Source/BasicMathFunctions/arm_sub_q7.c
 ../CMSIS/DSP/Source/BasicMathFunctions/arm_abs_f32.c:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS\DSP\Include/arm_math.h:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_compiler.h:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_gcc.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS\DSP\Include/arm_math.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_compiler.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_gcc.h:
 ../CMSIS/DSP/Source/BasicMathFunctions/arm_abs_q15.c:
 ../CMSIS/DSP/Source/BasicMathFunctions/arm_abs_q31.c:
 ../CMSIS/DSP/Source/BasicMathFunctions/arm_abs_q7.c:

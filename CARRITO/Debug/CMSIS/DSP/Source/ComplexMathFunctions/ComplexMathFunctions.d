@@ -2,9 +2,9 @@ CMSIS/DSP/Source/ComplexMathFunctions/ComplexMathFunctions.o \
  CMSIS/DSP/Source/ComplexMathFunctions/ComplexMathFunctions.d: \
  ../CMSIS/DSP/Source/ComplexMathFunctions/ComplexMathFunctions.c \
  ../CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_conj_f32.c \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS\DSP\Include/arm_math.h \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_compiler.h \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_gcc.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS\DSP\Include/arm_math.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_compiler.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_gcc.h \
  ../CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_conj_q15.c \
  ../CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_conj_q31.c \
  ../CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_dot_prod_f32.c \
@@ -23,9 +23,9 @@ CMSIS/DSP/Source/ComplexMathFunctions/ComplexMathFunctions.o \
  ../CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_mult_real_q15.c \
  ../CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_mult_real_q31.c
 ../CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_conj_f32.c:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS\DSP\Include/arm_math.h:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_compiler.h:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_gcc.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS\DSP\Include/arm_math.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_compiler.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_gcc.h:
 ../CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_conj_q15.c:
 ../CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_conj_q31.c:
 ../CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_dot_prod_f32.c:

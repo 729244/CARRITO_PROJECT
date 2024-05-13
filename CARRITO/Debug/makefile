@@ -63,7 +63,7 @@ main-build: CARRITO.axf
 CARRITO.axf: $(OBJS) $(USER_OBJS) makefile $(OPTIONAL_TOOL_DEPS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU Linker'
-	arm-none-eabi-gcc -nostdlib -L"D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS\DSP" -Xlinker -Map="CARRITO.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -T CARRITO_Debug.ld -o "CARRITO.axf" $(OBJS) $(USER_OBJS) $(LIBS) -larm_cortexM4lf_math
+	arm-none-eabi-gcc -nostdlib -L"Z:\EMBEBIDOS 2\Proyecto final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS\DSP" -Xlinker -Map="CARRITO.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -T CARRITO_Debug.ld -o "CARRITO.axf" $(OBJS) $(USER_OBJS) $(LIBS) -larm_cortexM4lf_math
 	@echo 'Finished building target: $@'
 	@echo ' '
 

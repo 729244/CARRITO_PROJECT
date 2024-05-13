@@ -2,9 +2,9 @@ CMSIS/DSP/Source/SupportFunctions/SupportFunctions.o \
  CMSIS/DSP/Source/SupportFunctions/SupportFunctions.d: \
  ../CMSIS/DSP/Source/SupportFunctions/SupportFunctions.c \
  ../CMSIS/DSP/Source/SupportFunctions/arm_copy_f32.c \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS\DSP\Include/arm_math.h \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_compiler.h \
- D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_gcc.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS\DSP\Include/arm_math.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_compiler.h \
+ Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_gcc.h \
  ../CMSIS/DSP/Source/SupportFunctions/arm_copy_q15.c \
  ../CMSIS/DSP/Source/SupportFunctions/arm_copy_q31.c \
  ../CMSIS/DSP/Source/SupportFunctions/arm_copy_q7.c \
@@ -25,9 +25,9 @@ CMSIS/DSP/Source/SupportFunctions/SupportFunctions.o \
  ../CMSIS/DSP/Source/SupportFunctions/arm_q7_to_q15.c \
  ../CMSIS/DSP/Source/SupportFunctions/arm_q7_to_q31.c
 ../CMSIS/DSP/Source/SupportFunctions/arm_copy_f32.c:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS\DSP\Include/arm_math.h:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_compiler.h:
-D:\Documentos\Embebidos_II\Practicas\CARRITO\CMSIS/cmsis_gcc.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS\DSP\Include/arm_math.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_compiler.h:
+Z:\EMBEBIDOS\ 2\Proyecto\ final\CARRITO_PROJECT\CARRITO_PROJECT\CARRITO\CMSIS/cmsis_gcc.h:
 ../CMSIS/DSP/Source/SupportFunctions/arm_copy_q15.c:
 ../CMSIS/DSP/Source/SupportFunctions/arm_copy_q31.c:
 ../CMSIS/DSP/Source/SupportFunctions/arm_copy_q7.c:

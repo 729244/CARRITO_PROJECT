@@ -1,12 +1,11 @@
 /*
  * GENERATED FILE - DO NOT EDIT
- * Copyright (c) 2008-2013 Code Red Technologies Ltd,
- * Copyright 2015, 2018-2019 NXP
- * (c) NXP Semiconductors 2013-2024
+ * Copyright 2008-2013 Code Red Technologies Ltd,
+ * Copyright 2013-2024 NXP
  * Generated linker script file for MK66FN2M0xxx18
  * Created from linkscript.ldt by FMCreateLinkLibraries
  * Using Freemarker v2.3.30
- * MCUXpresso IDE v11.7.0 [Build 9198] [2023-01-17] on 11 may 2024 16:30:59
+ * MCUXpresso IDE v11.8.0 [Build 1165] [2023-07-26] on 13 May 2024, 00:02:54
  */
 
 INCLUDE "CARRITO_Debug_library.ld"
@@ -151,7 +150,7 @@ SECTIONS
     } > SRAM_UPPER AT>PROGRAM_FLASH
 
     /* BSS section for SRAM_LOWER */
-    .bss_RAM2 : ALIGN(8)
+    .bss_RAM2 (NOLOAD) : ALIGN(8)
     {
        PROVIDE(__start_bss_RAM2 = .) ;
        PROVIDE(__start_bss_SRAM_LOWER = .) ;
@@ -165,7 +164,7 @@ SECTIONS
     } > SRAM_LOWER AT> SRAM_LOWER
 
     /* BSS section for FLEX_RAM */
-    .bss_RAM3 : ALIGN(8)
+    .bss_RAM3 (NOLOAD) : ALIGN(8)
     {
        PROVIDE(__start_bss_RAM3 = .) ;
        PROVIDE(__start_bss_FLEX_RAM = .) ;
@@ -179,7 +178,7 @@ SECTIONS
     } > FLEX_RAM AT> FLEX_RAM
 
     /* MAIN BSS SECTION */
-    .bss : ALIGN(8)
+    .bss (NOLOAD) : ALIGN(8)
     {
         _bss = .;
         PROVIDE(__start_bss_RAM = .) ;

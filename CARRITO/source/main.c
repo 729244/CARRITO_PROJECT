@@ -86,8 +86,6 @@ void DSPI_SlaveUserCallback(SPI_Type *base, dspi_slave_handle_t *handle, status_
  * Prototypes
  ******************************************************************************/
 static void spi_init(void *pvParameters);
-static void uart_init(void *pvParameters);
-static void uart_get_gps_data(void *pvParameters);
 static void get_size_spi(void *pvParameters);
 static void i2c_init(void *pvParameters);
 static void i2c_read_compass(void *pvParameters);
@@ -100,6 +98,8 @@ static void turn15(int8_t direction, uint8_t fordward_backward_selector);
 static void stopAndResetDirection();
 static void test(void *pvParameters);
 void volatile delay(uint32_t t_us);
+static void uart_init(void *pvParameters);
+static void uart_read_gps(void *pvParameters);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -138,7 +138,7 @@ uart_rtos_handle_t handle;
 struct _uart_handle t_handle;
 
 uart_rtos_config_t uart_config = {
-    .baudrate    = 57600,
+    .baudrate    = 57600 ,
     .parity      = kUART_ParityDisabled,
     .stopbits    = kUART_OneStopBit,
     .buffer      = background_buffer,
@@ -215,17 +215,18 @@ void PORTE_IRQHandler(void)
 }
 int main(void)
 {
-	init_pwm(pwm_channel_2);
-	init_pwm(pwm_channel_1);
-	delay(5000000);
-	CLOCK_SetSimSafeDivs();
 	overclocking();
+	BOARD_InitBootClocks();
+	CLOCK_SetSimSafeDivs();
+	//init_pwm(pwm_channel_2);
+	//init_pwm(pwm_channel_1);
+	//delay(5000000);
     /* Init board hardware. */
-	CLOCK_EnableClock(kCLOCK_PortA);
+	//CLOCK_EnableClock(kCLOCK_PortA);
 	CLOCK_EnableClock(kCLOCK_PortB);
 	CLOCK_EnableClock(kCLOCK_PortC);
 	CLOCK_EnableClock(kCLOCK_PortD);
-	CLOCK_EnableClock(kCLOCK_PortE);
+	//CLOCK_EnableClock(kCLOCK_PortE);
 	//BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
     /* PORTD0 (pin A5) is configured as SPI0_PCS0 */
@@ -279,23 +280,28 @@ int main(void)
     PORT_SetPinConfig(PORTB, 25U, &porte_pin25_config);
 
 	NVIC_SetPriority(EXAMPLE_I2C_MASTER_IRQN, 3);
+	NVIC_SetPriority(DEMO_UART_RX_TX_IRQn, 3);
+	__set_BASEPRI(10 << (8 - __NVIC_PRIO_BITS));
 
-	pwm_update(pwm_channel_1, 100);
+	//pwm_update(pwm_channel_1, 100);
 
     PRINTF("INICIO\r\n");
-    xTaskCreate(spi_init, "spi_init", configMINIMAL_STACK_SIZE + 100, NULL, 3U, &spi_init_handle);
+    //xTaskCreate(spi_init, "spi_init", configMINIMAL_STACK_SIZE + 100, NULL, 3U, &spi_init_handle);
     //xTaskCreate(motor_init, "motor_init", configMINIMAL_STACK_SIZE + 100, NULL, 3U, &motor_init_handle);
-    xTaskCreate(ultrasonic_init,"ultrasonic_init",configMINIMAL_STACK_SIZE + 100,NULL,3U,&ultrasonic_init_handle);
+   // xTaskCreate(ultrasonic_init,"ultrasonic_init",configMINIMAL_STACK_SIZE + 100,NULL,3U,&ultrasonic_init_handle);
 
-    xTaskCreate(get_size_spi, "get_size_spi", configMINIMAL_STACK_SIZE + 100, NULL, 2U, &get_size_spi_handle);
-    xTaskCreate(get_objets_spi,"get_objets_spi",configMINIMAL_STACK_SIZE + 100,NULL,2U,&get_objets_spi_handle);
+   // xTaskCreate(get_size_spi, "get_size_spi", configMINIMAL_STACK_SIZE + 100, NULL, 2U, &get_size_spi_handle);
+   // xTaskCreate(get_objets_spi,"get_objets_spi",configMINIMAL_STACK_SIZE + 100,NULL,2U,&get_objets_spi_handle);
 
-    xTaskCreate(ultrasonic,"ultrasonic",configMINIMAL_STACK_SIZE + 100,NULL,3U,&ultrasonic_handle);
+   // xTaskCreate(ultrasonic,"ultrasonic",configMINIMAL_STACK_SIZE + 100,NULL,3U,&ultrasonic_handle);
     //xTaskCreate(turn,"turn",configMINIMAL_STACK_SIZE + 100,NULL,2U,&turn_handle);
     //xTaskCreate(turn15,"turn15",configMINIMAL_STACK_SIZE + 100,NULL,2U,&turn15_handle);
     //xTaskCreate(stopAndResetDirection,"stopAndResetDirection",configMINIMAL_STACK_SIZE + 100,NULL,2U,&reset_direction_handle);
 
-    xTaskCreate(test,"test",configMINIMAL_STACK_SIZE + 100,NULL,1U,&test_handle);
+   // xTaskCreate(test,"test",configMINIMAL_STACK_SIZE + 100,NULL,1U,&test_handle);
+    xTaskCreate(uart_init,"UART_INI",configMINIMAL_STACK_SIZE + 100,NULL,1U,&uart_init_handle);
+    xTaskCreate(uart_read_gps,"GPS_READ",configMINIMAL_STACK_SIZE + 100,NULL,1U,&uart_read_gps_handle);
+
     vTaskStartScheduler();
     for (;;)
         ;
@@ -515,7 +521,7 @@ static void uart_read_gps(void *pvParameters)
         error = UART_RTOS_Receive(&handle, recv_buffer, sizeof(recv_buffer), &n);
         if (error == kStatus_UART_RxHardwareOverrun)
         {
-            PRINTF("UART Rx Hardware Overrun \n");
+           PRINTF("UART Rx Hardware Overrun \n");
         }
         if (error == kStatus_UART_RxRingBufferOverrun)
         {
@@ -533,7 +539,7 @@ static void uart_read_gps(void *pvParameters)
 				}
 				if(recv_buffer[i] == 0x0A){ //New line
 					start_capture = 0;
-					//TODO: verify this to work correctly
+					PRINTF(data_gps);
 					if(data_gps[3] == 0x52){
 						decodeGPRMC(data_gps, &gps_lon_lat);
 						vTaskSuspend(uart_read_gps_handle);
