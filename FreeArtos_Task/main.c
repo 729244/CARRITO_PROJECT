@@ -35,13 +35,19 @@
 #include "fsl_i2c.h"
 #include "fsl_i2c_freertos.h"
 
+#include <stdint.h>
+#include <stdbool.h>
+#include "fsl_clock.h"
+#include "pwm_controller.h"
+#include "fsl_gpio.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 #define EXAMPLE_DSPI_SLAVE_BASEADDR SPI2
 #define TRANSFER_SIZE 50U /*! Transfer dataSize */
-#define ECCHO 10u
-#define TRIGGER 0u
+#define ECCHO 11u
+#define TRIGGER 12u
 #define TURN_RIGHT 1
 #define TURN_LEFT -1
 #define STRAIGHT 2
@@ -88,15 +94,17 @@ static void i2c_read_compass(void *pvParameters);
 static void get_objets_spi(void *pvParameters);
 static void ultrasonic_init(void *pvParameters);
 static void ultrasonic(void *pvParameters);
-static void motor_init(void *pvParameters);
-static void turn(void *pvParameters);
-static void turn15(void *pvParameters);
-static void stopAndResetDirection(void *pvParameters);
+//static void motor_init(void *pvParameters);
+static void turn(uint8_t angle,int8_t direction);
+static void turn15(int8_t direction, uint8_t fordward_backward_selector);
+static void stopAndResetDirection();
+static void test(void *pvParameters);
+void volatile delay(uint32_t t_us);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
 //SPI
-uint8_t slaveRxSize[1U] = {0U};
+uint8_t slaveRxSize[1] = {0U};
 uint8_t slaveRxData[TRANSFER_SIZE] = {0U};
 dspi_slave_handle_t g_s_handle;
 uint8_t flag_spi = 0;
@@ -148,10 +156,11 @@ TaskHandle_t uart_read_gps_handle;
 TaskHandle_t ultrasonic_init_handle;
 TaskHandle_t ultrasonic_handle;
 TaskHandle_t get_objets_spi_handle;
-TaskHandle_t motor_init_handle;
-TaskHandle_t reset_direction_handle;
-TaskHandle_t turn15_handle;
-TaskHandle_t turn_handle;
+//TaskHandle_t motor_init_handle;
+//TaskHandle_t reset_direction_handle;
+//TaskHandle_t turn15_handle;
+//TaskHandle_t turn_handle;
+TaskHandle_t test_handle;
 
 /*******************************************************************************
  * Code
@@ -185,9 +194,9 @@ void DSPI_SlaveUserCallback(SPI_Type *base, dspi_slave_handle_t *handle, status_
     	}
     }
 }
-void PORTA_IRQHandler(void)
+void PORTE_IRQHandler(void)
 {
-    GPIO_PortClearInterruptFlags(GPIOA, 1U << ECCHO);
+    GPIO_PortClearInterruptFlags(GPIOE, 1U << ECCHO);
 	if (edge == 0){
 			PIT_StartTimer(PIT, kPIT_Chnl_0);
 			usec_start = PIT_GetCurrentTimerCount(PIT, kPIT_Chnl_0);
@@ -196,7 +205,7 @@ void PORTA_IRQHandler(void)
 	else{
 		usec_count = PIT_GetCurrentTimerCount(PIT, kPIT_Chnl_0);
 		PIT_StopTimer(PIT, kPIT_Chnl_0);
-		usec_final = COUNT_TO_USEC((usec_start-usec_count),CLOCK_GetFreq(kCLOCK_BusClk));
+		usec_final = COUNT_TO_USEC((usec_start-usec_count),CLOCK_GetFreq(kCLOCK_BusClk)/3);
 		cm = usec_final/59;
 		PRINTF("CM: %d\r\n", (uint32_t)cm);
 		edge = 0;
@@ -206,6 +215,10 @@ void PORTA_IRQHandler(void)
 }
 int main(void)
 {
+	init_pwm(pwm_channel_2);
+	init_pwm(pwm_channel_1);
+	delay(5000000);
+	CLOCK_SetSimSafeDivs();
 	overclocking();
     /* Init board hardware. */
 	CLOCK_EnableClock(kCLOCK_PortA);
@@ -213,12 +226,20 @@ int main(void)
 	CLOCK_EnableClock(kCLOCK_PortC);
 	CLOCK_EnableClock(kCLOCK_PortD);
 	CLOCK_EnableClock(kCLOCK_PortE);
-	CLOCK_SetSimSafeDivs();
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
+	//BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
+    /* PORTD0 (pin A5) is configured as SPI0_PCS0 */
+    PORT_SetPinMux(PORTB, 20U, kPORT_MuxAlt2);
+
+    /* PORTD1 (pin D4) is configured as SPI0_SCK */
+    PORT_SetPinMux(PORTB, 21U, kPORT_MuxAlt2);
+
+    /* PORTD2 (pin C4) is configured as SPI0_SOUT */
+    PORT_SetPinMux(PORTB, 22U, kPORT_MuxAlt2);
+
+    /* PORTD3 (pin B4) is configured as SPI0_SIN */
+    PORT_SetPinMux(PORTB, 23U, kPORT_MuxAlt2);
 	//UART pin init
-	CLOCK_EnableClock(kCLOCK_PortD);
 	PORT_SetPinMux(PORTD, 2U, kPORT_MuxAlt3);
 	PORT_SetPinMux(PORTD, 3U, kPORT_MuxAlt3);
 
@@ -259,19 +280,22 @@ int main(void)
 
 	NVIC_SetPriority(EXAMPLE_I2C_MASTER_IRQN, 3);
 
-	
+	pwm_update(pwm_channel_1, 100);
+
     PRINTF("INICIO\r\n");
-    xTaskCreate(spi_init, "spi_init", configMINIMAL_STACK_SIZE + 100, NULL, 2U, &spi_init_handle);
+    xTaskCreate(spi_init, "spi_init", configMINIMAL_STACK_SIZE + 100, NULL, 3U, &spi_init_handle);
     //xTaskCreate(motor_init, "motor_init", configMINIMAL_STACK_SIZE + 100, NULL, 3U, &motor_init_handle);
-    xTaskCreate(ultrasonic_init,"ultrasonic_init",configMINIMAL_STACK_SIZE + 100,NULL,2U,&ultrasonic_init_handle);
+    xTaskCreate(ultrasonic_init,"ultrasonic_init",configMINIMAL_STACK_SIZE + 100,NULL,3U,&ultrasonic_init_handle);
 
-    xTaskCreate(get_size_spi, "get_size_spi", configMINIMAL_STACK_SIZE + 100, NULL, 1U, &get_size_spi_handle);
-    xTaskCreate(get_objets_spi,"get_objets_spi",configMINIMAL_STACK_SIZE + 100,NULL,1U,&get_objets_spi_handle);
+    xTaskCreate(get_size_spi, "get_size_spi", configMINIMAL_STACK_SIZE + 100, NULL, 2U, &get_size_spi_handle);
+    xTaskCreate(get_objets_spi,"get_objets_spi",configMINIMAL_STACK_SIZE + 100,NULL,2U,&get_objets_spi_handle);
 
-    xTaskCreate(ultrasonic,"ultrasonic",configMINIMAL_STACK_SIZE + 100,NULL,1U,&ultrasonic_handle);
-    //xTaskCreate(turn,"turn",configMINIMAL_STACK_SIZE + 100,NULL,1U,&turn_handle);
-    //xTaskCreate(turn15,"turn15",configMINIMAL_STACK_SIZE + 100,NULL,1U,&turn15_handle);
-    //xTaskCreate(stopAndResetDirection,"stopAndResetDirection",configMINIMAL_STACK_SIZE + 100,NULL,1U,&reset_direction_handle);
+    xTaskCreate(ultrasonic,"ultrasonic",configMINIMAL_STACK_SIZE + 100,NULL,3U,&ultrasonic_handle);
+    //xTaskCreate(turn,"turn",configMINIMAL_STACK_SIZE + 100,NULL,2U,&turn_handle);
+    //xTaskCreate(turn15,"turn15",configMINIMAL_STACK_SIZE + 100,NULL,2U,&turn15_handle);
+    //xTaskCreate(stopAndResetDirection,"stopAndResetDirection",configMINIMAL_STACK_SIZE + 100,NULL,2U,&reset_direction_handle);
+
+    xTaskCreate(test,"test",configMINIMAL_STACK_SIZE + 100,NULL,1U,&test_handle);
     vTaskStartScheduler();
     for (;;)
         ;
@@ -299,6 +323,176 @@ static void spi_init(void *pvParameters)
 	vTaskDelete(spi_init_handle);
 }
 
+static void get_size_spi(void *pvParameters)
+{
+	dspi_transfer_t slaveXfer;
+	while(1){
+		flag_spi = 1;
+		slaveRxSize[0] = 0x00;
+		/* Set slave transfer ready to receive data */
+		slaveXfer.txData      = NULL;
+		slaveXfer.rxData      = slaveRxSize;
+		slaveXfer.dataSize    = 1U;
+		slaveXfer.configFlags = kDSPI_SlaveCtar0;
+
+		/* Slave start receive */
+		DSPI_SlaveTransferNonBlocking(EXAMPLE_DSPI_SLAVE_BASEADDR, &g_s_handle, &slaveXfer);
+		vTaskSuspend(get_size_spi_handle);
+	}
+}
+static void get_objets_spi(void *pvParameters){
+	dspi_transfer_t slaveXfer;
+	while(1){
+		vTaskSuspend(get_objets_spi_handle);
+    	flag_spi = 0;
+		/*for (uint8_t i = 0; i < (slaveRxSize[0]-48)*5+1; i++)
+		{
+			slaveRxData[i] = 0U;
+		}*/
+		uint32_t size_tranfer = 0;
+		if(slaveRxSize[0] == 48){
+			size_tranfer = 0;
+		}else{
+			size_tranfer = ((slaveRxSize[0]-48)*5)+1;
+		}
+		/* Set slave transfer ready to receive data */
+		slaveXfer.txData      = NULL;
+		slaveXfer.rxData      = slaveRxData;
+		slaveXfer.dataSize    = size_tranfer;
+		slaveXfer.configFlags = kDSPI_SlaveCtar0;
+
+		/* Slave start receive */
+		DSPI_SlaveTransferNonBlocking(EXAMPLE_DSPI_SLAVE_BASEADDR, &g_s_handle, &slaveXfer);
+	}
+}
+static void ultrasonic_init(void *pvParameters){
+    /* Define the init structure for the input switch pin */
+    gpio_pin_config_t input = {
+        kGPIO_DigitalInput,
+        0,
+    };
+
+    /* Define the init structure for the output LED pin */
+    gpio_pin_config_t output = {
+        kGPIO_DigitalOutput,
+        0,
+    };
+    PORT_SetPinMux(PORTE, ECCHO, kPORT_MuxAsGpio);
+    GPIO_PinInit(GPIOE, ECCHO, &input);
+    PORT_SetPinInterruptConfig(PORTE, ECCHO, kPORT_InterruptEitherEdge);
+    PORT_SetPinMux(PORTE, TRIGGER, kPORT_MuxAsGpio);
+    GPIO_PinInit(GPIOE, TRIGGER, &output);
+    GPIO_PortClear(GPIOE, 1U << TRIGGER);
+	pit_config_t pitConfig;
+	PIT_GetDefaultConfig(&pitConfig);
+	PIT_Init(PIT, &pitConfig);
+	PIT_SetTimerPeriod(PIT, kPIT_Chnl_0, USEC_TO_COUNT(500000,  CLOCK_GetFreq(kCLOCK_BusClk)));
+	PIT_StopTimer(PIT, kPIT_Chnl_0);
+	NVIC_SetPriority(PORTE_IRQn, 2u);
+	__set_BASEPRI(10 << (8 - __NVIC_PRIO_BITS));
+	EnableIRQ(PORTE_IRQn);
+    vTaskDelete(ultrasonic_init_handle);
+}
+static void ultrasonic(void *pvParameters){
+	while(1){
+		vTaskDelay(pdMS_TO_TICKS(10));
+		GPIO_PortToggle(GPIOE, 1U << TRIGGER);
+		vTaskDelay(pdMS_TO_TICKS(10));
+		GPIO_PortToggle(GPIOE, 1U << TRIGGER);
+		vTaskSuspend(ultrasonic_handle);
+	}
+}
+static void stopAndResetDirection(){
+	pwm_update(pwm_channel_2, 0);
+	pwm_update(pwm_channel_1, 0);
+	g_current_direction = STRAIGHT;
+	delay(350000);
+}
+
+static void turn(uint8_t angle,int8_t direction){
+	switch(angle){
+	case 15:
+		turn15(direction,FORDWARD);
+		stopAndResetDirection();
+		break;
+	case 30:
+		turn15(direction*-1,BACKWARD);
+		stopAndResetDirection();
+		turn15(direction,FORDWARD);
+		stopAndResetDirection();
+		break;
+	case 45:
+		turn15(direction*-1,BACKWARD);
+		stopAndResetDirection();
+		turn15(direction,FORDWARD);
+		turn15(direction,FORDWARD);
+		stopAndResetDirection();
+		break;
+	case 60:
+		turn15(direction*-1,BACKWARD);
+		turn15(direction*-1,BACKWARD);
+		stopAndResetDirection();
+		turn15(direction,FORDWARD);
+		turn15(direction,FORDWARD);
+		stopAndResetDirection();
+		break;
+	case 75:
+		turn15(direction*-1,BACKWARD);
+		turn15(direction*-1,BACKWARD);
+		stopAndResetDirection();
+		turn15(direction,FORDWARD);
+		turn15(direction,FORDWARD);
+		turn15(direction,FORDWARD);
+		stopAndResetDirection();
+		break;
+	case 90:
+		turn15(direction*-1,BACKWARD);
+		turn15(direction*-1,BACKWARD);
+		turn15(direction*-1,BACKWARD);
+		stopAndResetDirection();
+		turn15(direction,FORDWARD);
+		turn15(direction,FORDWARD);
+		turn15(direction,FORDWARD);
+		stopAndResetDirection();
+		break;
+	case 180:
+		turn(90,direction);
+		turn(90,direction);
+		stopAndResetDirection();
+		break;
+	}
+}
+
+static void turn15(int8_t direction, uint8_t fordward_backward_selector){
+	//Funcion para girar 15° hacia una dirección
+	if(direction != g_current_direction){
+		if(TURN_RIGHT == direction){
+			pwm_update(pwm_channel_2, -300);
+			g_current_direction = TURN_RIGHT;
+			delay(100000);
+		}
+		else{
+			pwm_update(pwm_channel_2, 300);
+			g_current_direction = TURN_LEFT;
+			delay(100000);
+		}
+	}
+	if(FORDWARD == fordward_backward_selector){
+		pwm_update(pwm_channel_1, 100);
+	}
+	else{
+		init_pwm(pwm_channel_1);
+		pwm_update(pwm_channel_1, -100);
+	}
+	delay(660000);
+}
+
+void volatile delay(uint32_t t_us)
+{
+	uint32_t n_counts = USEC_TO_COUNT(t_us, CLOCK_GetFreq(kCLOCK_CoreSysClk))/10;
+	uint32_t count;
+	for(count = 0; count < n_counts; count ++);
+}
 static void uart_init(void *pvParameters)
 {
 	uart_config.srcclk = DEMO_UART_CLK_FREQ;
@@ -417,237 +611,31 @@ static void i2c_read_compass(void *pvParameters)
 		vTaskSuspend(i2c_read_compass_handle);
 	}
 }
-
-static void get_size_spi(void *pvParameters)
-{
-	dspi_transfer_t slaveXfer;
-	while(1){
-		flag_spi = 1;
-		slaveRxSize[0] = 0x00;
-		/* Set slave transfer ready to receive data */
-		slaveXfer.txData      = NULL;
-		slaveXfer.rxData      = slaveRxSize;
-		slaveXfer.dataSize    = 1U;
-		slaveXfer.configFlags = kDSPI_SlaveCtar0;
-
-		/* Slave start receive */
-		DSPI_SlaveTransferNonBlocking(EXAMPLE_DSPI_SLAVE_BASEADDR, &g_s_handle, &slaveXfer);
-		vTaskSuspend(get_size_spi_handle);
-	}
-}
-static void get_objets_spi(void *pvParameters){
-	dspi_transfer_t slaveXfer;
-	while(1){
-		vTaskSuspend(get_objets_spi_handle);
-    	flag_spi = 0;
-		for (uint8_t i = 0; i < (slaveRxSize[0]-48)*5+1; i++)
+static void test(void *pvParameters){
+	while(1)
 		{
-			slaveRxData[i] = 0U;
-		}
-		uint32_t size_tranfer = 0;
-		if(slaveRxSize[0] == 48){
-			size_tranfer = 0;
-		}else{
-			size_tranfer = ((slaveRxSize[0]-48)*5)+1;
-		}
-		/* Set slave transfer ready to receive data */
-		slaveXfer.txData      = NULL;
-		slaveXfer.rxData      = slaveRxData;
-		slaveXfer.dataSize    = size_tranfer;
-		slaveXfer.configFlags = kDSPI_SlaveCtar0;
 
-		/* Slave start receive */
-		DSPI_SlaveTransferNonBlocking(EXAMPLE_DSPI_SLAVE_BASEADDR, &g_s_handle, &slaveXfer);
-	}
-}
-static void ultrasonic_init(void *pvParameters){
-    /* Define the init structure for the input switch pin */
-    gpio_pin_config_t input = {
-        kGPIO_DigitalInput,
-        0,
-    };
+			pwm_update(pwm_channel_1, 100);
+			delay(1000000);
+			stopAndResetDirection();
 
-    /* Define the init structure for the output LED pin */
-    gpio_pin_config_t output = {
-        kGPIO_DigitalOutput,
-        0,
-    };
-    PORT_SetPinMux(PORTA, ECCHO, kPORT_MuxAsGpio);
-    GPIO_PinInit(GPIOA, ECCHO, &input);
-    PORT_SetPinInterruptConfig(PORTA, ECCHO, kPORT_InterruptEitherEdge);
-    PORT_SetPinMux(PORTD, TRIGGER, kPORT_MuxAsGpio);
-    GPIO_PinInit(GPIOD, TRIGGER, &output);
-    GPIO_PortClear(GPIOD, 1U << TRIGGER);
-	pit_config_t pitConfig;
-	PIT_GetDefaultConfig(&pitConfig);
-	PIT_Init(PIT, &pitConfig);
-	PIT_SetTimerPeriod(PIT, kPIT_Chnl_0, USEC_TO_COUNT(500000,  CLOCK_GetFreq(kCLOCK_BusClk)));
-	PIT_StopTimer(PIT, kPIT_Chnl_0);
-	NVIC_SetPriority(PORTA_IRQn, 2u);
-	__set_BASEPRI(10 << (8 - __NVIC_PRIO_BITS));
-	EnableIRQ(PORTA_IRQn);
-    vTaskDelete(ultrasonic_init_handle);
-}
-static void ultrasonic(void *pvParameters){
-	while(1){
-		GPIO_PortToggle(GPIOE, 1U << TRIGGER);
-		vTaskDelay(pdMS_TO_TICKS(10));
-		GPIO_PortToggle(GPIOE, 1U << TRIGGER);
-		vTaskSuspend(ultrasonic_handle);
-	}
-}
-static void motor_init(void *pvParameters){
-	init_pwm(pwm_channel_2);
-	init_pwm(pwm_channel_1);
-	vTaskDelay(pdMS_TO_TICKS(5000));
-    vTaskDelete(motor_init_handle);
-}
-static void stopAndResetDirection(void *pvParameters){
-	while(1){
-		vTaskSuspend(reset_direction_handle);
-		pwm_update(pwm_channel_2, 0);
-		pwm_update(pwm_channel_1, 0);
-		g_current_direction = STRAIGHT;
-		vTaskDelay(pdMS_TO_TICKS(350));
-	}
-}
+			turn(90,TURN_RIGHT);
+			pwm_update(pwm_channel_1, 100);
+			delay(1000000);
+			stopAndResetDirection();
 
-static void turn(void *pvParameters){
-	while(1){
-		vTaskSuspend(turn_handle);
-		switch(angle){
-		case 15:
-			fordward_backward_selector = FORDWARD;
-			vTaskResume(turn_handle);
-			//turn15(direction,FORDWARD);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			break;
-		case 30:
-			direction=direction*-1;
-			fordward_backward_selector = BACKWARD;
-			vTaskResume(turn15_handle);
-			//turn15(direction*-1,BACKWARD);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			direction=direction*-1;
-			fordward_backward_selector = FORDWARD;
-			vTaskResume(turn15_handle);
-			//turn15(direction,FORDWARD);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			break;
-		case 45:
-			direction=direction*-1;
-			fordward_backward_selector = BACKWARD;
-			vTaskResume(turn15_handle);
-			//turn15(direction*-1,BACKWARD);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			direction=direction*-1;
-			fordward_backward_selector = FORDWARD;
-			vTaskResume(turn15_handle);
-			vTaskResume(turn15_handle);
-			//turn15(direction,FORDWARD);
-			//turn15(direction,FORDWARD);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			break;
-		case 60:
-			direction=direction*-1;
-			fordward_backward_selector = BACKWARD;
-			vTaskResume(turn15_handle);
-			vTaskResume(turn15_handle);
-			//turn15(direction*-1,BACKWARD);
-			//turn15(direction*-1,BACKWARD);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			direction=direction*-1;
-			fordward_backward_selector = FORDWARD;
-			vTaskResume(turn15_handle);
-			vTaskResume(turn15_handle);
-			//turn15(direction,FORDWARD);
-			//turn15(direction,FORDWARD);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			break;
-		case 75:
-			direction=direction*-1;
-			fordward_backward_selector = BACKWARD;
-			vTaskResume(turn15_handle);
-			vTaskResume(turn15_handle);
-			//turn15(direction*-1,BACKWARD);
-			//turn15(direction*-1,BACKWARD);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			direction=direction*-1;
-			fordward_backward_selector = FORDWARD;
-			vTaskResume(turn15_handle);
-			vTaskResume(turn15_handle);
-			vTaskResume(turn15_handle);
-			//turn15(direction,FORDWARD);
-			//turn15(direction,FORDWARD);
-			//turn15(direction,FORDWARD);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			break;
-		case 90:
-			direction=direction*-1;
-			fordward_backward_selector = BACKWARD;
-			vTaskResume(turn15_handle);
-			vTaskResume(turn15_handle);
-			vTaskResume(turn15_handle);
-			//turn15(direction*-1,BACKWARD);
-			//turn15(direction*-1,BACKWARD);
-			//turn15(direction*-1,BACKWARD);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			direction=direction*-1;
-			fordward_backward_selector = FORDWARD;
-			vTaskResume(turn15_handle);
-			vTaskResume(turn15_handle);
-			vTaskResume(turn15_handle);
-			//turn15(direction,FORDWARD);
-			//turn15(direction,FORDWARD);
-			//turn15(direction,FORDWARD);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			break;
-		case 180:
-			//???
-			//turn(90,direction);
-			//turn(90,direction);
-			vTaskResume(reset_direction_handle);
-			//stopAndResetDirection();
-			break;
-		}
-	}
-}
+			turn(180,TURN_LEFT);
+			pwm_update(pwm_channel_1, 100);
+			delay(1000000);
+			stopAndResetDirection();
 
-static void turn15(void *pvParameters){
-	while(1){
-		vTaskSuspend(turn15_handle);
-		//Funcion para girar 15° hacia una dirección
-		if(direction != g_current_direction){
-			if(TURN_RIGHT == direction){
-				pwm_update(pwm_channel_2, -300);
-				g_current_direction = TURN_RIGHT;
-				vTaskDelay(pdMS_TO_TICKS(100));
-			}
-			else{
-				pwm_update(pwm_channel_2, 300);
-				g_current_direction = TURN_LEFT;
-				vTaskDelay(pdMS_TO_TICKS(100));
-			}
-		}
-		if(FORDWARD == fordward_backward_selector){
-			pwm_update(pwm_channel_1, 50);
-		}
-		else{
+			turn(90,TURN_RIGHT);
 			init_pwm(pwm_channel_1);
-			pwm_update(pwm_channel_1, -75);
-		}
-		vTaskDelay(pdMS_TO_TICKS(660));
-	}
-}
+			pwm_update(pwm_channel_1, -100);
+			pwm_update(pwm_channel_1, -100);
+			delay(1000000);
+			stopAndResetDirection();
+			delay(10000000);
 
+		}
+}

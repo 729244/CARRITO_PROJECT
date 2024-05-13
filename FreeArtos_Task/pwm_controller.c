@@ -53,7 +53,7 @@ void init_pwm(pwm_t pwm)
 		FTM_EnableInterrupts(PWM_FTM, kFTM_TimeOverflowInterruptEnable);
 		g_ftm_initialized = true;
 		NVIC_EnableIRQ(FTM0_IRQ);
-		NVIC_SetPriority(FTM0_IRQ, 0);
+		NVIC_SetPriority(FTM0_IRQ, 4);
 	}
 	ftm_chnl_pwm_signal_param_t pwm_config =
 	{
